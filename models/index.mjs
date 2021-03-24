@@ -16,6 +16,10 @@ const sequelize = new Sequelize(config.database, config.username, config.passwor
 db.Game = gameModel(sequelize, Sequelize.DataTypes);
 db.User = UserModel(sequelize, Sequelize.DataTypes);
 
+// One to many relationships
+db.User.belongsToMany(db.Game, {through: 'game_users'});
+db.Game.belongsToMany(db.User, {through: 'game_users'});
+
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
 
