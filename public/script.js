@@ -1,15 +1,22 @@
 // global value that holds info about the current hand.
 let currentGame = null;
 
-// create game layout
+// Start page layout
 const mainContainer = document.getElementById('game-container');
-const btnsContainer = document.createElement('div');
 const createGameBtn = document.createElement('button');
+
+// Game layout
+const btnsContainer = document.createElement('div');
+const refreshGameBtn = document.createElement('button');
+const dealBtn = document.createElement('button');
+const dealListDiv = document.createElement('div');
+
 // For login page
 const loginContainer = document.createElement('div');
 const emailInput = document.createElement('input');
 const passwordInput = document.createElement('input');
 const submitBtn = document.createElement('button');
+
 
 // DOM manipulation function that displays the player's current hand.
 const runGame = function ({ playerHand }) {
@@ -39,8 +46,6 @@ const runGame = function ({ playerHand }) {
   }
 };
 
-// make a request to the server
-// to change the deck. set 2 new cards into the player hand.
 
 const testFunction = async () => {
   axios.get('/test')
@@ -49,6 +54,9 @@ const testFunction = async () => {
     })
     .catch(error => console.log(error));
 }
+
+// make a request to the server
+// to change the deck. set 2 new cards into the player hand.
 const dealCards = function () {
   axios.put(`/games/${currentGame.id}/deal`)
     .then((response) => {
@@ -78,7 +86,7 @@ const createGame = function () {
       // for this current game, create a button that will allow the user to
       // manipulate the deck that is on the DB.
       // Create a button for it.
-      const dealBtn = document.createElement('button');
+
       dealBtn.addEventListener('click', dealCards);
 
       // display the button
@@ -93,11 +101,16 @@ const createGame = function () {
 
 const renderGamePage = () => {
   mainContainer.innerHTML = '';
-  createGameBtn.addEventListener('click', createGame);
-  createGameBtn.innerText = 'Create Game';
-  document.body.appendChild(createGameBtn);
-  console.log('running testFunction...');
-  testFunction();
+  btnsContainer.appendChild(refreshGameBtn);
+  createGame();
+}
+
+const renderStartPage = () => {
+  mainContainer.innerHTML = '';
+  createGameBtn.addEventListener('click', renderGamePage);
+  createGameBtn.innerText = 'Create New Game';
+  createGameBtn.classList.add('btn', 'btn-success', 'btn-lg')
+  mainContainer.appendChild(createGameBtn); 
 }
 
 const authUserLogin = () => {
@@ -109,7 +122,7 @@ const authUserLogin = () => {
   axios.post('/login', userInfo)
     .then((result) => {
       if (result.data === 'valid'){
-        renderGamePage();
+        renderStartPage();
       } else {
         return
       }
