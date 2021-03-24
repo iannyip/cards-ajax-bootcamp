@@ -1,5 +1,5 @@
-export default function gameModel(sequelize, DataTypes) {
-  return sequelize.define('game', {
+export default function userModel(sequelize, DataTypes) {
+  return sequelize.define('user', {
     id: {
       allowNull: false,
       autoIncrement: true,

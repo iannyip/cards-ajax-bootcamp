@@ -1,8 +1,15 @@
 // global value that holds info about the current hand.
 let currentGame = null;
 
-// create game btn
+// create game layout
+const mainContainer = document.getElementById('game-container');
+const btnsContainer = document.createElement('div');
 const createGameBtn = document.createElement('button');
+// For login page
+const loginContainer = document.createElement('div');
+const emailInput = document.createElement('input');
+const passwordInput = document.createElement('input');
+const submitBtn = document.createElement('button');
 
 // DOM manipulation function that displays the player's current hand.
 const runGame = function ({ playerHand }) {
@@ -34,6 +41,14 @@ const runGame = function ({ playerHand }) {
 
 // make a request to the server
 // to change the deck. set 2 new cards into the player hand.
+
+const testFunction = async () => {
+  axios.get('/test')
+    .then(() => {
+      console.log('test')
+    })
+    .catch(error => console.log(error));
+}
 const dealCards = function () {
   axios.put(`/games/${currentGame.id}/deal`)
     .then((response) => {
@@ -55,7 +70,6 @@ const createGame = function () {
     .then((response) => {
       // set the global value to the new game.
       currentGame = response.data;
-
       console.log(currentGame);
 
       // display it out to the user
@@ -77,7 +91,52 @@ const createGame = function () {
     });
 };
 
+const renderGamePage = () => {
+  mainContainer.innerHTML = '';
+  createGameBtn.addEventListener('click', createGame);
+  createGameBtn.innerText = 'Create Game';
+  document.body.appendChild(createGameBtn);
+  console.log('running testFunction...');
+  testFunction();
+}
+
+const authUserLogin = () => {
+  const userInfo = {
+    email: document.getElementById('email').value,
+    password: document.getElementById('password').value,
+  }
+  console.log(userInfo);
+  axios.post('/login', userInfo)
+    .then((result) => {
+      if (result.data === 'valid'){
+        renderGamePage();
+      } else {
+        return
+      }
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+}
+
+const renderLoginPage = () => {
+  loginContainer.classList.add('login_container')
+  emailInput.placeholder = 'email';
+  passwordInput.placeholder = 'password';
+  submitBtn.innerText = "Login";
+  submitBtn.setAttribute('type', 'submit');
+
+  [emailInput, passwordInput, submitBtn].forEach(element => {
+    element.id = element.placeholder || element.innerText;
+    element.classList.add('form-control', 'my-4');
+    submitBtn.classList.add('btn', 'btn-primary')
+    loginContainer.appendChild(element);
+  })
+  mainContainer.appendChild(loginContainer);
+  submitBtn.addEventListener('click', authUserLogin);
+}
+
 // manipulate DOM, set up create game button
-createGameBtn.addEventListener('click', createGame);
-createGameBtn.innerText = 'Create Game';
-document.body.appendChild(createGameBtn);
+
+
+renderLoginPage();
