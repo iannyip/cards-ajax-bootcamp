@@ -9,3 +9,12 @@
   padding: 20px;
   text-align: center;
 }
+
+.btn-long {
+  width: 150px;
+}
+
+.col-grey {
+  background-color: rgb(212, 212, 212);
+  margin: 5px;
+}

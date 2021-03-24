@@ -10,6 +10,10 @@ const btnsContainer = document.createElement('div');
 const refreshGameBtn = document.createElement('button');
 const dealBtn = document.createElement('button');
 const dealListDiv = document.createElement('div');
+const player1Win = document.createElement('div');
+const player2Win = document.createElement('div');
+const player1Card = document.createElement('div');
+const player2Card = document.createElement('div');
 
 // For login page
 const loginContainer = document.createElement('div');
@@ -21,14 +25,16 @@ const submitBtn = document.createElement('button');
 // DOM manipulation function that displays the player's current hand.
 const runGame = function ({ playerHand }) {
   // manipulate DOM
-  const gameContainer = document.querySelector('#game-container');
-
-  gameContainer.innerText = `
-    Your Hand:
+  player1Card.innerText = `
+    Player 1 Hand
     ====
     ${playerHand[0].name}
     of
     ${playerHand[0].suit}
+    ====
+  `;
+  player2Card.innerText = `
+    Player 2 Hand
     ====
     ${playerHand[1].name}
     of
@@ -36,13 +42,15 @@ const runGame = function ({ playerHand }) {
     ====
   `;
 
-  let winner;
   if (playerHand[0].rank > playerHand[1].rank){
-    gameContainer.innerText += "card 1 won";
+    player1Win.innerText = "PLAYER 1 WON";
+    player2Win.innerText = "";
   } else if (playerHand[0].rank < playerHand[1].rank){
-    gameContainer.innerText += 'card 2 won';
+    player1Win.innerText = "";
+    player2Win.innerText = 'PLAYER 2 WON';
   } else {
-    gameContainer.innerText += "it was a draw";
+    player1Win.innerText = "DRAW";
+    player2Win.innerText = "DRAW";
   }
 };
 
@@ -82,16 +90,6 @@ const createGame = function () {
 
       // display it out to the user
       runGame(currentGame);
-
-      // for this current game, create a button that will allow the user to
-      // manipulate the deck that is on the DB.
-      // Create a button for it.
-
-      dealBtn.addEventListener('click', dealCards);
-
-      // display the button
-      dealBtn.innerText = 'Deal';
-      document.body.appendChild(dealBtn);
     })
     .catch((error) => {
       // handle error
@@ -101,7 +99,28 @@ const createGame = function () {
 
 const renderGamePage = () => {
   mainContainer.innerHTML = '';
-  btnsContainer.appendChild(refreshGameBtn);
+  mainContainer.appendChild(btnsContainer);
+  mainContainer.appendChild(dealListDiv);
+ 
+  // Style buttons
+  btnsContainer.classList.add('d-flex', 'justify-content-around', 'p-4');
+  console.log('about to add buttons');
+  [refreshGameBtn, dealBtn].forEach((element) => {
+    btnsContainer.appendChild(element);
+    element.classList.add('btn', 'btn-primary', 'btn-long');
+    console.log('btn added');
+  });
+  dealBtn.innerText = 'Deal';
+  refreshGameBtn.innerText = 'Refresh';
+  dealBtn.addEventListener('click', dealCards);
+
+  // Style table
+  dealListDiv.classList.add('row', 'justify-content-around');
+  [player1Win, player2Win, player1Card, player2Card].forEach((boxe) => {
+    dealListDiv.appendChild(boxe)
+    boxe.classList.add('col-5', 'col-grey');
+  })
+  
   createGame();
 }
 
@@ -148,8 +167,5 @@ const renderLoginPage = () => {
   mainContainer.appendChild(loginContainer);
   submitBtn.addEventListener('click', authUserLogin);
 }
-
-// manipulate DOM, set up create game button
-
 
 renderLoginPage();
