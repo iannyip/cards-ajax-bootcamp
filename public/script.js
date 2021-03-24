@@ -19,7 +19,17 @@ const runGame = function ({ playerHand }) {
     ${playerHand[1].name}
     of
     ${playerHand[1].suit}
+    ====
   `;
+
+  let winner;
+  if (playerHand[0].rank > playerHand[1].rank){
+    gameContainer.innerText += "card 1 won";
+  } else if (playerHand[0].rank < playerHand[1].rank){
+    gameContainer.innerText += 'card 2 won';
+  } else {
+    gameContainer.innerText += "it was a draw";
+  }
 };
 
 // make a request to the server

@@ -23,9 +23,32 @@ module.exports = {
         type: Sequelize.DATE,
       },
     });
+    await queryInterface.createTable('users', {
+      id: {
+        allowNull: false,
+        autoIncrement: true,
+        primaryKey: true,
+        type: Sequelize.INTEGER,
+      },
+      email: {
+        type: Sequelize.TEXT,
+      },
+      password: {
+        type: Sequelize.TEXT,
+      },
+      created_at: {
+        allowNull: false,
+        type: Sequelize.DATE,
+      },
+      updated_at: {
+        allowNull: false,
+        type: Sequelize.DATE,
+      },
+    });
   },
 
   down: async (queryInterface) => {
     await queryInterface.dropTable('games');
+    await queryInterface.dropTable('users');
   },
 };
