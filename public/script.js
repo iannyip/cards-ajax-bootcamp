@@ -3,13 +3,15 @@ let currentGame = null;
 
 // Start page layout
 const mainContainer = document.getElementById('game-container');
+mainContainer.classList.add('container');
 const createGameBtn = document.createElement('button');
 
 // Game layout
-const btnsContainer = document.createElement('div');
+const btnsContainerRow = document.createElement('div');
 const refreshGameBtn = document.createElement('button');
 const dealBtn = document.createElement('button');
-const dealListDiv = document.createElement('div');
+const playerWinRow = document.createElement('div');
+const dealListRow = document.createElement('div');
 const player1Win = document.createElement('div');
 const player2Win = document.createElement('div');
 const player1Card = document.createElement('div');
@@ -20,7 +22,6 @@ const loginContainer = document.createElement('div');
 const emailInput = document.createElement('input');
 const passwordInput = document.createElement('input');
 const submitBtn = document.createElement('button');
-
 
 // DOM manipulation function that displays the player's current hand.
 const runGame = function ({ playerHand }) {
@@ -42,26 +43,25 @@ const runGame = function ({ playerHand }) {
     ====
   `;
 
-  if (playerHand[0].rank > playerHand[1].rank){
-    player1Win.innerText = "PLAYER 1 WON";
-    player2Win.innerText = "";
-  } else if (playerHand[0].rank < playerHand[1].rank){
-    player1Win.innerText = "";
+  if (playerHand[0].rank > playerHand[1].rank) {
+    player1Win.innerText = 'PLAYER 1 WON';
+    player2Win.innerText = '';
+  } else if (playerHand[0].rank < playerHand[1].rank) {
+    player1Win.innerText = '';
     player2Win.innerText = 'PLAYER 2 WON';
   } else {
-    player1Win.innerText = "DRAW";
-    player2Win.innerText = "DRAW";
+    player1Win.innerText = 'DRAW';
+    player2Win.innerText = 'DRAW';
   }
 };
-
 
 const testFunction = async () => {
   axios.get('/test')
     .then(() => {
-      console.log('test')
+      console.log('test');
     })
-    .catch(error => console.log(error));
-}
+    .catch((error) => console.log(error));
+};
 
 // make a request to the server
 // to change the deck. set 2 new cards into the player hand.
@@ -79,7 +79,7 @@ const dealCards = function () {
       console.log(error);
     });
 };
-
+// createGame() is the same as dealCards, except that the point to different routes
 const createGame = function () {
   // Make a request to create a new game
   axios.post('/games')
@@ -99,14 +99,15 @@ const createGame = function () {
 
 const renderGamePage = () => {
   mainContainer.innerHTML = '';
-  mainContainer.appendChild(btnsContainer);
-  mainContainer.appendChild(dealListDiv);
- 
+  mainContainer.appendChild(btnsContainerRow);
+  mainContainer.appendChild(playerWinRow);
+  mainContainer.appendChild(dealListRow);
+
   // Style buttons
-  btnsContainer.classList.add('d-flex', 'justify-content-around', 'p-4');
+  btnsContainerRow.classList.add('d-flex', 'justify-content-around', 'p-4');
   console.log('about to add buttons');
   [refreshGameBtn, dealBtn].forEach((element) => {
-    btnsContainer.appendChild(element);
+    btnsContainerRow.appendChild(element);
     element.classList.add('btn', 'btn-primary', 'btn-long');
     console.log('btn added');
   });
@@ -115,57 +116,65 @@ const renderGamePage = () => {
   dealBtn.addEventListener('click', dealCards);
 
   // Style table
-  dealListDiv.classList.add('row', 'justify-content-around');
-  [player1Win, player2Win, player1Card, player2Card].forEach((boxe) => {
-    dealListDiv.appendChild(boxe)
+  playerWinRow.classList.add('row', 'justify-content-around');
+  [player1Win, player2Win].forEach((element) => {
+    playerWinRow.appendChild(element);
+    element.classList.add('col-5', 'col-grey');
+  });
+  dealListRow.classList.add('row', 'justify-content-around');
+  [player1Card, player2Card].forEach((boxe) => {
+    dealListRow.appendChild(boxe);
     boxe.classList.add('col-5', 'col-grey');
-  })
-  
+  });
+
   createGame();
-}
+};
 
 const renderStartPage = () => {
   mainContainer.innerHTML = '';
   createGameBtn.addEventListener('click', renderGamePage);
   createGameBtn.innerText = 'Create New Game';
-  createGameBtn.classList.add('btn', 'btn-success', 'btn-lg')
-  mainContainer.appendChild(createGameBtn); 
-}
+  createGameBtn.classList.add('btn', 'btn-success', 'btn-lg');
+  mainContainer.appendChild(createGameBtn);
+};
 
 const authUserLogin = () => {
   const userInfo = {
     email: document.getElementById('email').value,
     password: document.getElementById('password').value,
-  }
+  };
   console.log(userInfo);
   axios.post('/login', userInfo)
     .then((result) => {
-      if (result.data === 'valid'){
+      console.log(result.data === 'valid');
+      console.log('user id: ', result.data);
+      if (result.data !== null) {
+        console.log(result.data);
         renderStartPage();
       } else {
-        return
+
       }
     })
     .catch((error) => {
       console.log(error);
     });
-}
+};
 
 const renderLoginPage = () => {
-  loginContainer.classList.add('login_container')
+  loginContainer.classList.add('login_container');
   emailInput.placeholder = 'email';
   passwordInput.placeholder = 'password';
-  submitBtn.innerText = "Login";
+  submitBtn.innerText = 'Login';
   submitBtn.setAttribute('type', 'submit');
 
-  [emailInput, passwordInput, submitBtn].forEach(element => {
+  [emailInput, passwordInput, submitBtn].forEach((element) => {
     element.id = element.placeholder || element.innerText;
     element.classList.add('form-control', 'my-4');
-    submitBtn.classList.add('btn', 'btn-primary')
+    submitBtn.classList.add('btn', 'btn-primary');
     loginContainer.appendChild(element);
-  })
+  });
   mainContainer.appendChild(loginContainer);
   submitBtn.addEventListener('click', authUserLogin);
-}
+};
 
 renderLoginPage();

@@ -12,6 +12,15 @@
  */
 
 // get a random index from an array given it's size
+
+const getRandomWithExclude = (length, excludedNo) => {
+  const randomNo = Math.floor(Math.random() * length) + 1;
+  if (randomNo === excludedNo) {
+    return getRandomWithExclude(length, excludedNo);
+  }
+  return randomNo;
+};
+
 const getRandomIndex = function (size) {
   return Math.floor(Math.random() * size);
 };
@@ -112,6 +121,8 @@ export default function initGamesController(db) {
     // deal out a new shuffled deck for this game.
     const cardDeck = shuffleCards(makeDeck());
     const playerHand = [cardDeck.pop(), cardDeck.pop()];
+    const { userId } = request.cookies;
+    console.log(userId);
 
     const newGame = {
       gameState: {
@@ -123,6 +134,14 @@ export default function initGamesController(db) {
     try {
       // run the DB INSERT query
       const game = await db.Game.create(newGame);
+      const player1 = await db.User.findOne({ where: { id: userId } });
+      const users = await db.User.findAll();
+      const player2 = users[getRandomWithExclude(users.length, userId)];
+      console.log('player 2:', player2);
+      console.log(`player 1: ${player1.id}`);
+      console.log(`player 2: ${player2.id}`);
+      const p1Game = await game.addUser(player1);
+      const p2Game = await game.addUser(player2);
 
       // send the new game back to the user.
       // dont include the deck so the user can't cheat
