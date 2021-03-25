@@ -5,6 +5,12 @@
   padding: 10px;
 }
 
+.game-title {
+  font-size: 50px;
+  font-family: "Times New Roman";
+  text-shadow: 1px 1px #ff0000;
+}
+
 #game-container {
   padding: 20px;
   text-align: center;
@@ -15,6 +21,6 @@
 }
 
 .col-grey {
-  background-color: rgb(212, 212, 212);
+  background-color: rgb(231, 225, 225);
   margin: 5px;
 }

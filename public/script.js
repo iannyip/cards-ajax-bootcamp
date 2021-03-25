@@ -4,16 +4,22 @@ let currentGame = null;
 // Start page layout
 const mainContainer = document.getElementById('game-container');
 mainContainer.classList.add('container');
+const gameTitle = document.createElement('h1');
+gameTitle.classList.add('game-title');
+gameTitle.innerText = 'HIGH CARD';
 const createGameBtn = document.createElement('button');
 
 // Game layout
 const btnsContainerRow = document.createElement('div');
 const refreshGameBtn = document.createElement('button');
 const dealBtn = document.createElement('button');
+const playerNameRow = document.createElement('div');
+const player1Name = document.createElement('div');
+const player2Name = document.createElement('div');
 const playerWinRow = document.createElement('div');
-const dealListRow = document.createElement('div');
 const player1Win = document.createElement('div');
 const player2Win = document.createElement('div');
+const dealListRow = document.createElement('div');
 const player1Card = document.createElement('div');
 const player2Card = document.createElement('div');
 
@@ -24,7 +30,7 @@ const passwordInput = document.createElement('input');
 const submitBtn = document.createElement('button');
 
 // DOM manipulation function that displays the player's current hand.
-const runGame = function ({ playerHand }) {
+const runGame = ({ playerHand }) => {
   // manipulate DOM
   player1Card.innerText = `
     Player 1 Hand
@@ -65,7 +71,7 @@ const testFunction = async () => {
 
 // make a request to the server
 // to change the deck. set 2 new cards into the player hand.
-const dealCards = function () {
+const dealCards = () => {
   axios.put(`/games/${currentGame.id}/deal`)
     .then((response) => {
       // get the updated hand value
@@ -80,7 +86,7 @@ const dealCards = function () {
     });
 };
 // createGame() is the same as dealCards, except that the point to different routes
-const createGame = function () {
+const createGame = () => {
   // Make a request to create a new game
   axios.post('/games')
     .then((response) => {
@@ -99,7 +105,9 @@ const createGame = function () {
 
 const renderGamePage = () => {
   mainContainer.innerHTML = '';
+  mainContainer.appendChild(gameTitle);
   mainContainer.appendChild(btnsContainerRow);
+  mainContainer.appendChild(playerNameRow);
   mainContainer.appendChild(playerWinRow);
   mainContainer.appendChild(dealListRow);
 
@@ -115,16 +123,21 @@ const renderGamePage = () => {
   refreshGameBtn.innerText = 'Refresh';
   dealBtn.addEventListener('click', dealCards);
 
-  // Style table
-  playerWinRow.classList.add('row', 'justify-content-around');
+  // Style rows
+  [playerWinRow, dealListRow, playerNameRow].forEach((row) => {
+    row.classList.add('row', 'justify-content-around');
+  });
   [player1Win, player2Win].forEach((element) => {
     playerWinRow.appendChild(element);
     element.classList.add('col-5', 'col-grey');
   });
-  dealListRow.classList.add('row', 'justify-content-around');
-  [player1Card, player2Card].forEach((boxe) => {
-    dealListRow.appendChild(boxe);
-    boxe.classList.add('col-5', 'col-grey');
+  [player1Name, player2Name].forEach((element) => {
+    playerNameRow.appendChild(element);
+    element.classList.add('col-5', 'col-grey');
+  });
+  [player1Card, player2Card].forEach((element) => {
+    dealListRow.appendChild(element);
+    element.classList.add('col-5', 'col-grey');
   });
 
   createGame();
@@ -132,6 +145,7 @@ const renderGamePage = () => {
 
 const renderStartPage = () => {
   mainContainer.innerHTML = '';
+  mainContainer.appendChild(gameTitle);
   createGameBtn.addEventListener('click', renderGamePage);
   createGameBtn.innerText = 'Create New Game';
   createGameBtn.classList.add('btn', 'btn-success', 'btn-lg');
@@ -173,6 +187,7 @@ const renderLoginPage = () => {
     submitBtn.classList.add('btn', 'btn-primary');
     loginContainer.appendChild(element);
   });
+  mainContainer.appendChild(gameTitle);
   mainContainer.appendChild(loginContainer);
   submitBtn.addEventListener('click', authUserLogin);
 };

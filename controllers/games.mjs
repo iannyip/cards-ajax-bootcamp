@@ -136,17 +136,22 @@ export default function initGamesController(db) {
       const game = await db.Game.create(newGame);
       const player1 = await db.User.findOne({ where: { id: userId } });
       const users = await db.User.findAll();
-      const player2 = users[getRandomWithExclude(users.length, userId)];
+      console.log(users);
+      const randomNo = getRandomWithExclude(users.length, userId);
+      console.log('random number:', randomNo);
+      const player2 = users[randomNo - 1];
       console.log('player 2:', player2);
-      console.log(`player 1: ${player1.id}`);
-      console.log(`player 2: ${player2.id}`);
-      const p1Game = await game.addUser(player1);
-      const p2Game = await game.addUser(player2);
+      console.log(`Player 1: ${player1.id}`);
+      console.log(`Player 2: ${player2.id}`);
+      // const p1Game = await game.addUser(player1);
+      // const p2Game = await game.addUser(player2);
 
       // send the new game back to the user.
       // dont include the deck so the user can't cheat
       response.send({
         id: game.id,
+        p1Name: player1.email,
+        p2Name: player2.email,
         playerHand: game.gameState.playerHand,
       });
     } catch (error) {
