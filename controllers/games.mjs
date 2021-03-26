@@ -15,9 +15,16 @@
 
 const getRandomWithExclude = (length, excludedNo) => {
   const randomNo = Math.floor(Math.random() * length) + 1;
-  if (randomNo === excludedNo) {
+  if (Number(randomNo) === Number(excludedNo)) {
+    console.log(`${randomNo} = ${excludedNo}`);
     return getRandomWithExclude(length, excludedNo);
   }
+  // let randomNo;
+  // while (randomNo === excludedNo) {
+  //   randomNo = Math.floor(Math.random() * length) + 1;
+  //   console.log(`${randomNo} = ${excludedNo}`);
+  // }
+  // console.log('this ran');
   return randomNo;
 };
 
@@ -97,6 +104,16 @@ const makeDeck = function () {
   return deck;
 };
 
+const countWins = (array, user) => {
+  let wins = 0;
+  array.forEach((result) => {
+    if (result === user) {
+      wins += 1;
+    }
+  });
+  return wins;
+};
+
 /*
  * ========================================================
  * ========================================================
@@ -121,6 +138,8 @@ export default function initGamesController(db) {
     // deal out a new shuffled deck for this game.
     const cardDeck = shuffleCards(makeDeck());
     const playerHand = [cardDeck.pop(), cardDeck.pop()];
+    const results = [];
+    const players = [];
     const { userId } = request.cookies;
     console.log(userId);
 
@@ -128,6 +147,8 @@ export default function initGamesController(db) {
       gameState: {
         cardDeck,
         playerHand,
+        results,
+        players,
       },
     };
 
@@ -137,25 +158,60 @@ export default function initGamesController(db) {
       const player1 = await db.User.findOne({ where: { id: userId } });
       const users = await db.User.findAll();
       console.log(users);
-      const randomNo = getRandomWithExclude(users.length, userId);
+      const randomNo = await getRandomWithExclude(users.length, userId);
+      console.log(`length: ${users.length}, user: ${userId}`);
       console.log('random number:', randomNo);
       const player2 = users[randomNo - 1];
       console.log('player 2:', player2);
       console.log(`Player 1: ${player1.id}`);
       console.log(`Player 2: ${player2.id}`);
-      // const p1Game = await game.addUser(player1);
-      // const p2Game = await game.addUser(player2);
+      const p1Game = await game.addUser(player1);
+      const p2Game = await game.addUser(player2);
+      newGame.gameState.players = [player1.id, player2.id];
+      await game.update(newGame);
+      console.log(game.gameState);
 
       // send the new game back to the user.
       // dont include the deck so the user can't cheat
       response.send({
         id: game.id,
-        p1Name: player1.email,
-        p2Name: player2.email,
+        p1Name: player1.id,
+        p2Name: player2.id,
         playerHand: game.gameState.playerHand,
+        results: [0, 0],
       });
     } catch (error) {
       response.status(500).send(error);
+    }
+  };
+
+  const update = async (request, response) => {
+    try {
+      // Get exising game info
+      const game = await db.Game.findByPk(request.params.id);
+      const gameUpdate = game.gameState;
+      console.log('~~~~~~ BEFORE ~~~~~~~');
+      console.log(gameUpdate);
+
+      // Checkout new result
+      console.log('#############');
+      console.log('results came in: ', request.body.winner);
+      console.log('previous results: ', gameUpdate.results);
+      console.log('#############');
+
+      // Update db
+      gameUpdate.results.push(request.body.winner);
+      console.log('#############');
+      console.log(gameUpdate.results);
+      await db.Game.update(
+        { gameState: gameUpdate },
+        { where: { id: game.id } },
+      );
+      console.log('~~~~~~ AFTER ~~~~~~~');
+      console.log(game.gameState);
+      response.send('thanks');
+    } catch (error) {
+      console.log(error);
     }
   };
 
@@ -173,15 +229,46 @@ export default function initGamesController(db) {
         gameState: {
           cardDeck: game.gameState.cardDeck,
           playerHand,
+          results: game.gameState.results,
+          players: game.gameState.players,
         },
 
       });
 
       // send the updated game back to the user.
       // dont include the deck so the user can't cheat
+      const winsArr = [
+        countWins(game.gameState.results, game.gameState.players[0]),
+        countWins(game.gameState.results, game.gameState.players[1]),
+      ];
+
       response.send({
         id: game.id,
+        p1Name: game.gameState.players[0],
+        p2Name: game.gameState.players[1],
         playerHand: game.gameState.playerHand,
+        results: winsArr,
+      });
+    } catch (error) {
+      response.status(500).send(error);
+    }
+  };
+
+  const refresh = async (request, response) => {
+    try {
+      const game = await db.Game.findByPk(request.params.id);
+      console.log('refreshing...');
+      console.log(game.gameState);
+      const winsArr = [
+        countWins(game.gameState.results, game.gameState.players[0]),
+        countWins(game.gameState.results, game.gameState.players[1]),
+      ];
+      response.send({
+        id: game.id,
+        p1Name: game.gameState.players[0],
+        p2Name: game.gameState.players[1],
+        playerHand: game.gameState.playerHand,
+        results: winsArr,
       });
     } catch (error) {
       response.status(500).send(error);
@@ -193,6 +280,8 @@ export default function initGamesController(db) {
   return {
     deal,
     create,
+    update,
     index,
+    refresh,
   };
 }
